@@ -34,5 +34,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# python
 .venv
 .vscode
+.pytest_cache
+.ruff_cache
+__pycache__
