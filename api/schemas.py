@@ -1,10 +1,15 @@
 from pydantic import BaseModel
 
 
+class Shuffle(BaseModel):
+    id: str
+    name: str
+
+
 class SimulationRequest(BaseModel):
     id: str
     repeats: int
-    steps: list[dict[str, str]]
+    steps: list[Shuffle]
 
 
 class SimulationResult(BaseModel):

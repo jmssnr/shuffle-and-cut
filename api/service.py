@@ -1,5 +1,6 @@
 import numpy as np
-from api.schemas import SimulationResult
+from api.schemas import SimulationResult, Shuffle
+from fastapi.exceptions import HTTPException
 
 
 def riffle_shuffle(deck: list) -> list:
@@ -24,16 +25,18 @@ def cut(deck: list) -> list:
 
 
 def simulate_shuffle_sequence(
-    id: str, repeats: int, steps: list[dict[str, str]]
+    id: str, repeats: int, steps: list[Shuffle]
 ) -> SimulationResult:
     models = {"riffle": riffle_shuffle, "strip": strip, "cut": cut}
 
     sequence = []
     for step in steps:
-        if step["id"] in models.keys():
-            sequence.append(models[step["id"]])
+        if step.id in models.keys():
+            sequence.append(models[step.id])
         else:
-            raise KeyError(f"Step with id: '{step['id']}' does not exist")
+            raise HTTPException(
+                status_code=400, detail=f"Shuffle with id: '{step.id}' does not exist"
+            )
 
     experiments = []
     for _ in range(0, repeats):
