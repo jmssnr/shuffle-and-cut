@@ -24,11 +24,18 @@ def cut(deck: list) -> list:
     return deck[slice:] + deck[:slice]
 
 
-def simulate_shuffle_sequence(
-    id: str, repeats: int, steps: list[Shuffle]
-) -> SimulationResult:
-    models = {"riffle": riffle_shuffle, "strip": strip, "cut": cut}
+def _run_simulations(repeats: int, steps: list[callable]) -> list[list[int]]:
+    simulations = []
+    for _ in range(0, repeats):
+        deck = list(range(1, 53))
+        for step in steps:
+            deck = step(deck)
+        simulations.append(deck)
+    return simulations
 
+
+def _build_model_sequence(steps: list[Shuffle]) -> list[callable]:
+    models = {"riffle": riffle_shuffle, "strip": strip, "cut": cut}
     sequence = []
     for step in steps:
         if step.id in models.keys():
@@ -37,25 +44,26 @@ def simulate_shuffle_sequence(
             raise HTTPException(
                 status_code=400, detail=f"Shuffle with id: '{step.id}' does not exist"
             )
+    return sequence
 
-    experiments = []
-    for _ in range(0, repeats):
-        deck = list(range(1, 53))
-        for step in sequence:
-            deck = step(deck)
-        experiments.append(deck)
+
+def _compute_probability_density(card_pos: int, simulations: list[list[int]]):
+    return np.histogram(
+        [idx for sim in simulations for idx, c in enumerate(sim) if c == card_pos],
+        52,
+        density=True,
+    )[0].tolist()
+
+
+def simulate_shuffle_sequence(
+    id: str, repeats: int, steps: list[Shuffle]
+) -> SimulationResult:
+    sequence = _build_model_sequence(steps)
+
+    simulations = _run_simulations(repeats, sequence)
 
     result = {
-        card: np.histogram(
-            [
-                idx
-                for res in experiments
-                for idx, carde in enumerate(res)
-                if carde == card
-            ],
-            52,
-            density=True,
-        )[0].tolist()
+        card: _compute_probability_density(card, simulations)
         for card in list(range(1, 53))
     }
 
