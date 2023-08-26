@@ -37,7 +37,7 @@ def simulate_shuffle_sequence(
 
     experiments = []
     for _ in range(0, repeats):
-        deck = list(range(1, 52))
+        deck = list(range(1, 53))
         for step in sequence:
             deck = step(deck)
         experiments.append(deck)
@@ -53,7 +53,7 @@ def simulate_shuffle_sequence(
             52,
             density=True,
         )[0].tolist()
-        for card in list(range(1, 52))
+        for card in list(range(1, 53))
     }
 
     return SimulationResult(id=id, result=result)
