@@ -1,3 +1,5 @@
-export default function Home() {
-  return <div>Hello shuffl.</div>
+import { HeroSection } from "@/components/hero-section/HeroSection";
+
+export default function HomePage() {
+  return <HeroSection />;
 }
