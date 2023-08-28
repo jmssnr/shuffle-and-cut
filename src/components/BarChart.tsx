@@ -23,9 +23,16 @@ import { createDeck } from "@/utils";
 type BarChartProps = {
   data: [];
   initialPos: string;
+  xLabel: string;
+  yLabel: string;
 };
 
-export const BarChart = ({ data, initialPos }: BarChartProps) => {
+export const BarChart = ({
+  data,
+  initialPos,
+  xLabel,
+  yLabel,
+}: BarChartProps) => {
   const bardata = {
     labels: createDeck(52),
     datasets: data?.map((modelRes, index) => {
@@ -39,7 +46,7 @@ export const BarChart = ({ data, initialPos }: BarChartProps) => {
 
   const options = {
     indexAxis: "y" as const,
-    // maintainAspectRatio: false,
+    maintainAspectRatio: false,
     plugins: {
       colors: {
         forceOverride: true,
@@ -48,14 +55,14 @@ export const BarChart = ({ data, initialPos }: BarChartProps) => {
     scales: {
       y: {
         grid: { display: false },
-        title: { text: "Card Position", display: true },
+        title: { text: yLabel, display: true },
       },
       x: {
         grid: { display: false },
-        title: { text: "Probability Density", display: true },
+        title: { text: xLabel, display: true },
       },
     },
   };
 
-  return <Bar data={bardata} options={options} style={{ height: "500px" }} />;
+  return <Bar data={bardata} options={options} />;
 };
