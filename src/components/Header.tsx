@@ -20,10 +20,18 @@ export const Header = () => {
         </Anchor>
         <Group>
           <ActionIcon>
-            <IconBrandGithub size="1.1rem" stroke={1.5} />
+            <IconBrandGithub
+              href="https://github.com/jmssnr/shuffle-and-cut"
+              size="1.1rem"
+              stroke={1.5}
+            />
           </ActionIcon>
           <ActionIcon>
-            <IconBrandInstagram size="1.1rem" stroke={1.5} />
+            <IconBrandInstagram
+              href="https://www.instagram.com/the_phantom_at_the_card_table"
+              size="1.1rem"
+              stroke={1.5}
+            />
           </ActionIcon>
         </Group>
       </Group>

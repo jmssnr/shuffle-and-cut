@@ -32,4 +32,4 @@ python -m uvicorn "api.index:app" --reload
 
 The backend then runs on [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-To run the frontend with install the necessary dependencies with `npm install` then run the frontend locally in development mode with `npm run dev`. Open [http://localhost:3000](http://localhost:3000) with your browser to see the frontend of **shuffl**.
+To run the frontend, install the necessary dependencies with `npm install` then run the frontend locally in development mode with `npm run dev`. Open [http://localhost:3000](http://localhost:3000) with your browser to see the frontend of **shuffl**.
