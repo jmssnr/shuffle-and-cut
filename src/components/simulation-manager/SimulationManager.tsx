@@ -13,6 +13,8 @@ export const SimulationManager = () => {
   const [models, modelsHandlers] = useListState<Model>([]);
   const [initialPos, setInitialPos] = useState(1);
   const [simResult, setSimResult] = useState([]);
+  const [firstClick, setFirstClick] = useState(0);
+  const [firstSim, setFirstSim] = useState(0);
 
   const disableSimulateButton = () => {
     return models
@@ -23,6 +25,7 @@ export const SimulationManager = () => {
   };
 
   const runSimulation = () => {
+    setFirstSim(1);
     const promises = models
       .filter((model) => model.isSelected == true)
       .map((model) => {
@@ -65,69 +68,110 @@ export const SimulationManager = () => {
           width: "100%",
         }}
       >
-        <Card.Section inheritPadding py="xs" withBorder>
-          <Group position="apart">
-            <Button onClick={open} leftIcon={<IconSquarePlus size="1rem" />}>
-              Add Model
+        {firstClick == 0 ? (
+          <div style={{ margin: "auto", textAlign: "center" }}>
+            <Text color="dimmed" p="sm">
+              Start by creating your first shuffle model
+            </Text>
+            <Button leftIcon={<IconSquarePlus size="1rem" />} onClick={open}>
+              Create Model
             </Button>
-            <Button
-              disabled={models.length == 0}
-              onClick={() => modelsHandlers.setState([])}
-              color="pink"
-              leftIcon={<IconTrash size="1rem" />}
-            >
-              Clear Models
-            </Button>
-          </Group>
-        </Card.Section>
-        <Card.Section style={{ flex: "1 1 auto" }}>
-          <ModelTable models={models} modelsHandlers={modelsHandlers} />
-        </Card.Section>
-        <Card.Section withBorder p="xs">
-          <Group>
-            <Button onClick={runSimulation} disabled={disableSimulateButton()}>
-              Simulate
-            </Button>
-          </Group>
-        </Card.Section>
+          </div>
+        ) : (
+          <>
+            <Card.Section inheritPadding py="xs" withBorder>
+              <Group position="apart">
+                <Button
+                  onClick={open}
+                  leftIcon={<IconSquarePlus size="1rem" />}
+                >
+                  Add Model
+                </Button>
+                <Button
+                  disabled={models.length == 0}
+                  onClick={() => modelsHandlers.setState([])}
+                  color="pink"
+                  leftIcon={<IconTrash size="1rem" />}
+                >
+                  Clear Models
+                </Button>
+              </Group>
+            </Card.Section>
+            <Card.Section style={{ flex: "1 1 auto" }}>
+              <ModelTable models={models} modelsHandlers={modelsHandlers} />
+            </Card.Section>
+            <Card.Section withBorder p="xs">
+              <Group>
+                <Button
+                  onClick={runSimulation}
+                  disabled={disableSimulateButton()}
+                >
+                  Simulate
+                </Button>
+              </Group>
+            </Card.Section>{" "}
+          </>
+        )}
       </Card>
       <Card
         withBorder
         shadow="sm"
         style={{ minHeight: "500px", height: "calc(100vh - 70px)" }}
       >
-        <Stack>
-          <Text>Initial Card Location</Text>
-          <Slider
-            thumbChildren={<IconPlayCard size="1rem" />}
-            defaultValue={1}
-            min={1}
-            max={52}
-            step={1}
-            value={initialPos}
-            onChange={setInitialPos}
-            thumbSize={26}
-            styles={{ thumb: { borderWidth: rem(2), padding: rem(3) } }}
-            marks={createDeck(52).map((card) => {
-              return { value: card };
-            })}
-          />
-        </Stack>
-        <div style={{ marginTop: "25px", height: "80%" }}>
-          <BarChart
-            xLabel="Card Location"
-            yLabel="Probability Density"
-            //@ts-ignore
-            data={simResult}
-            initialPos={initialPos}
-          />
-        </div>
+        {firstSim == 0 ? (
+          <div
+            style={{
+              minHeight: "500px",
+              height: "calc(100vh - 70px)",
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              margin: "auto",
+            }}
+          >
+            <Text color="dimmed">
+              Create a model and then start your simulation to visualize the
+              results
+            </Text>
+          </div>
+        ) : (
+          <>
+            <Stack>
+              <Text>Initial Card Location</Text>
+              <Slider
+                thumbChildren={<IconPlayCard size="1rem" />}
+                defaultValue={1}
+                min={1}
+                max={52}
+                step={1}
+                value={initialPos}
+                onChange={setInitialPos}
+                thumbSize={26}
+                styles={{ thumb: { borderWidth: rem(2), padding: rem(3) } }}
+                marks={createDeck(52).map((card) => {
+                  return { value: card };
+                })}
+              />
+            </Stack>
+            <div style={{ marginTop: "25px", height: "80%" }}>
+              <BarChart
+                xLabel="Card Location"
+                yLabel="Probability Density"
+                //@ts-ignore
+                data={simResult}
+                initialPos={initialPos}
+              />
+            </div>
+          </>
+        )}
       </Card>
       <AddModelDrawer
         opened={opened}
         close={close}
         models={models}
         modelsHandlers={modelsHandlers}
+        firstClick={firstClick}
+        setFirstClick={setFirstClick}
       />
     </div>
   );

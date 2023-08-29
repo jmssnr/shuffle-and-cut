@@ -54,6 +54,8 @@ type AddModelDrawerProps = {
   close: () => void;
   models: Model[];
   modelsHandlers: UseListStateHandlers<Model>;
+  firstClick: number;
+  setFirstClick: (n: number) => void;
 };
 
 export const AddModelDrawer = ({
@@ -61,6 +63,8 @@ export const AddModelDrawer = ({
   close,
   models,
   modelsHandlers,
+  firstClick,
+  setFirstClick,
 }: AddModelDrawerProps) => {
   const [steps, stepsHandlers] = useListState<Shuffle>([]);
   const { classes, cx } = useStyles();
@@ -184,6 +188,7 @@ export const AddModelDrawer = ({
                 steps: steps,
                 isSelected: true,
               });
+              firstClick == 0 && setFirstClick(1);
               close();
               stepsHandlers.setState([]);
             }}
