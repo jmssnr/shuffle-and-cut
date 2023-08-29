@@ -1,20 +1,48 @@
-import {
-  Group,
-  Card,
-  Tabs,
-  Button,
-  Grid,
-  rem,
-  Text,
-  Slider,
-  Stack,
-  Select,
-} from "@mantine/core";
+import { Group, Card, Button, rem, Text, Slider, Stack } from "@mantine/core";
 import { createDeck } from "@/utils";
 import { IconPlayCard, IconSquarePlus, IconTrash } from "@tabler/icons-react";
 import { BarChart } from "../BarChart";
+import { AddModelDrawer } from "./AddModelDrawer";
+import { useDisclosure, useListState } from "@mantine/hooks";
+import { Model } from "./types";
+import { useState } from "react";
+import { ModelTable } from "./ModelTable";
 
 export const SimulationManager = () => {
+  const [opened, { open, close }] = useDisclosure(false);
+  const [models, modelsHandlers] = useListState<Model>([]);
+  const [initialPos, setInitialPos] = useState(1);
+  const [simResult, setSimResult] = useState([]);
+
+  const disableSimulateButton = () => {
+    return models
+      .map((model) => model.isSelected == true && model.id)
+      .filter(Boolean).length == 0
+      ? true
+      : false;
+  };
+
+  const runSimulation = () => {
+    const promises = models
+      .filter((model) => model.isSelected == true)
+      .map((model) => {
+        return fetch("/api/simulate-shuffle-sequence", {
+          method: "POST",
+          body: JSON.stringify({
+            id: model.id.toString(),
+            repeats: 1000,
+            steps: model.steps,
+          }),
+          headers: {
+            // ***
+            "Content-Type": "application/json", // ***
+          },
+        }).then((res) => res.json());
+      });
+    //@ts-ignore
+    Promise.all(promises).then((res) => setSimResult(res));
+  };
+
   return (
     <div
       style={{
@@ -39,16 +67,27 @@ export const SimulationManager = () => {
       >
         <Card.Section inheritPadding py="xs" withBorder>
           <Group position="apart">
-            <Button leftIcon={<IconSquarePlus size="1rem" />}>Add Model</Button>
-            <Button color="pink" leftIcon={<IconTrash size="1rem" />}>
+            <Button onClick={open} leftIcon={<IconSquarePlus size="1rem" />}>
+              Add Model
+            </Button>
+            <Button
+              disabled={models.length == 0}
+              onClick={() => modelsHandlers.setState([])}
+              color="pink"
+              leftIcon={<IconTrash size="1rem" />}
+            >
               Clear Models
             </Button>
           </Group>
         </Card.Section>
-        <Card.Section style={{ flex: "1 1 auto" }}>Table</Card.Section>
+        <Card.Section style={{ flex: "1 1 auto" }}>
+          <ModelTable models={models} modelsHandlers={modelsHandlers} />
+        </Card.Section>
         <Card.Section withBorder p="xs">
           <Group>
-            <Button >Simulate</Button>
+            <Button onClick={runSimulation} disabled={disableSimulateButton()}>
+              Simulate
+            </Button>
           </Group>
         </Card.Section>
       </Card>
@@ -65,6 +104,8 @@ export const SimulationManager = () => {
             min={1}
             max={52}
             step={1}
+            value={initialPos}
+            onChange={setInitialPos}
             thumbSize={26}
             styles={{ thumb: { borderWidth: rem(2), padding: rem(3) } }}
             marks={createDeck(52).map((card) => {
@@ -74,13 +115,20 @@ export const SimulationManager = () => {
         </Stack>
         <div style={{ marginTop: "25px", height: "80%" }}>
           <BarChart
-            xLabel="Probability Density"
-            yLabel="Card Location"
-            data={[]}
-            initialPos="1"
+            xLabel="Card Location"
+            yLabel="Probability Density"
+            //@ts-ignore
+            data={simResult}
+            initialPos={initialPos}
           />
         </div>
       </Card>
+      <AddModelDrawer
+        opened={opened}
+        close={close}
+        models={models}
+        modelsHandlers={modelsHandlers}
+      />
     </div>
   );
 

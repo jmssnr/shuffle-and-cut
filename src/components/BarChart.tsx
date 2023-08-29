@@ -3,12 +3,12 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
   Tooltip,
   Legend,
   Colors,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import annotationPlugin from "chartjs-plugin-annotation";
 
 ChartJS.register(
   CategoryScale,
@@ -16,13 +16,14 @@ ChartJS.register(
   BarElement,
   Legend,
   Colors,
-  Tooltip
+  Tooltip,
+  annotationPlugin
 );
 import { createDeck } from "@/utils";
 
 type BarChartProps = {
   data: [];
-  initialPos: string;
+  initialPos: number;
   xLabel: string;
   yLabel: string;
 };
@@ -33,23 +34,37 @@ export const BarChart = ({
   xLabel,
   yLabel,
 }: BarChartProps) => {
+  console.log(data);
+
   const bardata = {
     labels: createDeck(52),
     datasets: data?.map((modelRes, index) => {
       return {
         label: `Model-${index + 1}`,
-        data: modelRes[parseInt(initialPos)],
+        //@ts-ignore
+        data: modelRes.result[parseInt(initialPos.toString())],
         barThickness: 6,
       };
     }),
   };
 
   const options = {
-    indexAxis: "y" as const,
+    // indexAxis: "y" as const,
     maintainAspectRatio: false,
     plugins: {
       colors: {
         forceOverride: true,
+      },
+      annotation: {
+        annotations: {
+          line1: {
+            type: "line",
+            scaleID: "x",
+            value: initialPos - 1,
+            borderColor: "rgb(255, 99, 132)",
+            borderWidth: 2,
+          },
+        },
       },
     },
     scales: {
@@ -63,6 +78,6 @@ export const BarChart = ({
       },
     },
   };
-
+  //@ts-ignore
   return <Bar data={bardata} options={options} />;
 };
