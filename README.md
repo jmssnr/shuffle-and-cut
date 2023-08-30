@@ -5,10 +5,10 @@
 The application is deployed on Vercel and you can check it out and play with it [here](https://shuffle-and-cut.vercel.app).
 
 You can choose between three different shuffle types to build your shuffle model: Riffle, Strip and Cut.
-![here](./public/BuildModels.png)
+![here](public/BuildModels.png)
 
 After running your simulation, you can visualize the resulting probability density for each initial card location and you can compare the effect of different shuffles.
-![anaylze](./public/CompareModels.png)
+![anaylze](public/CompareModels.png)
 
 My interest in the statistics of playing card shuffles was sparked by reading the paper by
 [Bayer and Diaconis](https://www.jstor.org/stable/2959752). I could not find a suitable tool to run my own experiments so I set out to build it myself. Eventually, this led to the hobby project **shuffl**.
