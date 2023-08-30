@@ -40,7 +40,8 @@ export const BarChart = ({
     labels: createDeck(52),
     datasets: data?.map((modelRes, index) => {
       return {
-        label: `Model-${index + 1}`,
+        //@ts-ignore
+        label: `Model-${modelRes.id}`,
         //@ts-ignore
         data: modelRes.result[parseInt(initialPos.toString())],
         barThickness: 6,
@@ -58,6 +59,11 @@ export const BarChart = ({
       annotation: {
         annotations: {
           line1: {
+            label: {
+              display: true,
+              content: "Initial Card Location",
+              position: "start",
+            },
             type: "line",
             scaleID: "x",
             value: initialPos - 1,

@@ -51,7 +51,6 @@ export const ModelTable = ({ models, modelsHandlers }: ModelTableProps) => {
       <tbody>
         {models.map(function (d, idx) {
           const counts = countShuffleTypes(d);
-
           return (
             <tr
               key={idx}

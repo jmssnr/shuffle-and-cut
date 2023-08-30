@@ -4,7 +4,12 @@ import { Model, Shuffle } from "./types";
 import { useListState } from "@mantine/hooks";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { createStyles, rem } from "@mantine/core";
-import { IconGripVertical } from "@tabler/icons-react";
+import {
+  IconGripVertical,
+  IconTrash,
+  IconSquareX,
+  IconSquareCheck,
+} from "@tabler/icons-react";
 
 const useStyles = createStyles((theme) => ({
   item: {
@@ -141,6 +146,8 @@ export const AddModelDrawer = ({
             </Button>
           </Button.Group>
           <Button
+            color="pink"
+            leftIcon={<IconTrash size="1rem" />}
             onClick={() => stepsHandlers.setState([])}
             disabled={steps.length == 0 ? true : false}
           >
@@ -193,10 +200,13 @@ export const AddModelDrawer = ({
               stepsHandlers.setState([]);
             }}
             disabled={steps.length == 0 && true}
+            leftIcon={<IconSquareCheck size="1rem" />}
           >
             Save
           </Button>
-          <Button onClick={close}>Cancel</Button>
+          <Button leftIcon={<IconSquareX size="1rem" />} onClick={close}>
+            Cancel
+          </Button>
         </Group>
       </Stack>
     </Drawer>

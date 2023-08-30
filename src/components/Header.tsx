@@ -1,6 +1,7 @@
 import { Paper, Group, Anchor, ActionIcon } from "@mantine/core";
 import { useRouter } from "next/router";
 import { IconBrandGithub, IconBrandInstagram } from "@tabler/icons-react";
+import Link from "next/link";
 export const Header = () => {
   const router = useRouter();
 
@@ -19,19 +20,21 @@ export const Header = () => {
           shuffl.
         </Anchor>
         <Group>
-          <ActionIcon>
-            <IconBrandGithub
-              href="https://github.com/jmssnr/shuffle-and-cut"
-              size="1.1rem"
-              stroke={1.5}
-            />
+          <ActionIcon
+            onClick={() =>
+              router.push("https://github.com/jmssnr/shuffle-and-cut")
+            }
+          >
+            <IconBrandGithub size="1.1rem" stroke={1.5} />
           </ActionIcon>
-          <ActionIcon>
-            <IconBrandInstagram
-              href="https://www.instagram.com/the_phantom_at_the_card_table"
-              size="1.1rem"
-              stroke={1.5}
-            />
+          <ActionIcon
+            onClick={() =>
+              router.push(
+                "https://www.instagram.com/the_phantom_at_the_card_table"
+              )
+            }
+          >
+            <IconBrandInstagram size="1.1rem" stroke={1.5} />
           </ActionIcon>
         </Group>
       </Group>

@@ -9,10 +9,11 @@ import {
   ScrollArea,
   useMantineTheme,
   LoadingOverlay,
+  NumberInput,
 } from "@mantine/core";
 import { createDeck } from "@/utils";
 import {
-  IconPlayCard,
+  IconPlayerPlay,
   IconSquarePlus,
   IconTrash,
   IconChartHistogram,
@@ -35,6 +36,7 @@ export const SimulationManager = () => {
   const [firstClick, setFirstClick] = useState(0);
   const [firstSim, setFirstSim] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [repeats, setRepeats] = useState<number | "">(1000);
 
   const handleDisableSimulate = () => {
     return models.filter((model) => model.isSelected == true).length == 0;
@@ -55,12 +57,11 @@ export const SimulationManager = () => {
           method: "POST",
           body: JSON.stringify({
             id: model.id.toString(),
-            repeats: 1000,
+            repeats: repeats,
             steps: model.steps,
           }),
           headers: {
-            // ***
-            "Content-Type": "application/json", // ***
+            "Content-Type": "application/json",
           },
         }).then((res) => res.json());
       });
@@ -69,8 +70,6 @@ export const SimulationManager = () => {
       .then((res) => setSimResult(res))
       .then(() => setIsLoading(false));
   };
-
-  console.log(isLoading);
 
   return (
     <div
@@ -86,16 +85,38 @@ export const SimulationManager = () => {
         topBar={
           firstClick != 0 && (
             <Group position="apart">
-              <Button onClick={open}>Add Model</Button>
-              <Button onClick={handleClearModels}>Clear Models</Button>
+              <Button leftIcon={<IconSquarePlus size="1rem" />} onClick={open}>
+                Add Model
+              </Button>
+              <Button
+                color="pink"
+                leftIcon={<IconTrash size="1rem" />}
+                onClick={handleClearModels}
+              >
+                Clear Models
+              </Button>
             </Group>
           )
         }
         bottomBar={
           firstClick != 0 && (
-            <Button onClick={handleSimulate} disabled={handleDisableSimulate()}>
-              Simulate
-            </Button>
+            <Group align="end">
+              <NumberInput
+                label={"Number of simulations"}
+                value={repeats}
+                step={100}
+                min={500}
+                max={10000}
+                onChange={setRepeats}
+              />
+              <Button
+                leftIcon={<IconPlayerPlay size="1rem" />}
+                onClick={handleSimulate}
+                disabled={handleDisableSimulate()}
+              >
+                Simulate
+              </Button>
+            </Group>
           )
         }
       >
