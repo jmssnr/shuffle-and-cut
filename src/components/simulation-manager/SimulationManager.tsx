@@ -1,30 +1,52 @@
-import { Group, Card, Button, rem, Text, Slider, Stack } from "@mantine/core";
+import {
+  Group,
+  Card,
+  Button,
+  rem,
+  Text,
+  Slider,
+  Stack,
+  ScrollArea,
+  useMantineTheme,
+  LoadingOverlay,
+} from "@mantine/core";
 import { createDeck } from "@/utils";
-import { IconPlayCard, IconSquarePlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconPlayCard,
+  IconSquarePlus,
+  IconTrash,
+  IconChartHistogram,
+} from "@tabler/icons-react";
 import { BarChart } from "../BarChart";
 import { AddModelDrawer } from "./AddModelDrawer";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { Model } from "./types";
 import { useState } from "react";
 import { ModelTable } from "./ModelTable";
+import { ContentCard } from "./ContentCard";
+import { InitialPosSlider } from "./InitialPosSlider";
 
 export const SimulationManager = () => {
+  const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const [models, modelsHandlers] = useListState<Model>([]);
   const [initialPos, setInitialPos] = useState(1);
   const [simResult, setSimResult] = useState([]);
   const [firstClick, setFirstClick] = useState(0);
   const [firstSim, setFirstSim] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const disableSimulateButton = () => {
-    return models
-      .map((model) => model.isSelected == true && model.id)
-      .filter(Boolean).length == 0
-      ? true
-      : false;
+  const handleDisableSimulate = () => {
+    return models.filter((model) => model.isSelected == true).length == 0;
   };
 
-  const runSimulation = () => {
+  const handleClearModels = () => {
+    modelsHandlers.setState([]);
+    setFirstSim(0);
+  };
+
+  const handleSimulate = () => {
+    setIsLoading(true);
     setFirstSim(1);
     const promises = models
       .filter((model) => model.isSelected == true)
@@ -42,9 +64,13 @@ export const SimulationManager = () => {
           },
         }).then((res) => res.json());
       });
-    //@ts-ignore
-    Promise.all(promises).then((res) => setSimResult(res));
+    Promise.all(promises)
+      //@ts-ignore
+      .then((res) => setSimResult(res))
+      .then(() => setIsLoading(false));
   };
+
+  console.log(isLoading);
 
   return (
     <div
@@ -56,115 +82,69 @@ export const SimulationManager = () => {
         gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
       }}
     >
-      <Card
-        withBorder
-        shadow="sm"
-        padding="xs"
-        style={{
-          minHeight: "500px",
-          height: "calc(100vh - 70px)",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
+      <ContentCard
+        topBar={
+          firstClick != 0 && (
+            <Group position="apart">
+              <Button onClick={open}>Add Model</Button>
+              <Button onClick={handleClearModels}>Clear Models</Button>
+            </Group>
+          )
+        }
+        bottomBar={
+          firstClick != 0 && (
+            <Button onClick={handleSimulate} disabled={handleDisableSimulate()}>
+              Simulate
+            </Button>
+          )
+        }
       >
         {firstClick == 0 ? (
-          <div style={{ margin: "auto", textAlign: "center" }}>
+          <Stack align="center" justify="center" h={"100%"}>
             <Text color="dimmed" p="sm">
               Start by creating your first shuffle model
             </Text>
             <Button leftIcon={<IconSquarePlus size="1rem" />} onClick={open}>
               Create Model
             </Button>
-          </div>
+          </Stack>
         ) : (
-          <>
-            <Card.Section inheritPadding py="xs" withBorder>
-              <Group position="apart">
-                <Button
-                  onClick={open}
-                  leftIcon={<IconSquarePlus size="1rem" />}
-                >
-                  Add Model
-                </Button>
-                <Button
-                  disabled={models.length == 0}
-                  onClick={() => modelsHandlers.setState([])}
-                  color="pink"
-                  leftIcon={<IconTrash size="1rem" />}
-                >
-                  Clear Models
-                </Button>
-              </Group>
-            </Card.Section>
-            <Card.Section style={{ flex: "1 1 auto" }}>
-              <ModelTable models={models} modelsHandlers={modelsHandlers} />
-            </Card.Section>
-            <Card.Section withBorder p="xs">
-              <Group>
-                <Button
-                  onClick={runSimulation}
-                  disabled={disableSimulateButton()}
-                >
-                  Simulate
-                </Button>
-              </Group>
-            </Card.Section>{" "}
-          </>
+          <ScrollArea>
+            <ModelTable models={models} modelsHandlers={modelsHandlers} />
+          </ScrollArea>
         )}
-      </Card>
-      <Card
-        withBorder
-        shadow="sm"
-        style={{ minHeight: "500px", height: "calc(100vh - 70px)" }}
+      </ContentCard>
+      <ContentCard
+        topBar={
+          firstSim != 0 && (
+            <InitialPosSlider
+              initialPos={initialPos}
+              setInitialPos={setInitialPos}
+            />
+          )
+        }
       >
         {firstSim == 0 ? (
-          <div
-            style={{
-              minHeight: "500px",
-              height: "calc(100vh - 70px)",
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              margin: "auto",
-            }}
-          >
-            <Text color="dimmed">
-              Create a model and then start your simulation to visualize the
-              results
-            </Text>
-          </div>
+          <Stack align="center" justify="center" h={"100%"}>
+            <IconChartHistogram
+              size="150"
+              stroke="0.8"
+              color={theme.colors.gray[4]}
+            />
+          </Stack>
         ) : (
           <>
-            <Stack>
-              <Text>Initial Card Location</Text>
-              <Slider
-                thumbChildren={<IconPlayCard size="1rem" />}
-                defaultValue={1}
-                min={1}
-                max={52}
-                step={1}
-                value={initialPos}
-                onChange={setInitialPos}
-                thumbSize={26}
-                styles={{ thumb: { borderWidth: rem(2), padding: rem(3) } }}
-                marks={createDeck(52).map((card) => {
-                  return { value: card };
-                })}
-              />
-            </Stack>
-            <div style={{ marginTop: "25px", height: "80%" }}>
-              <BarChart
-                xLabel="Card Location"
-                yLabel="Probability Density"
-                //@ts-ignore
-                data={simResult}
-                initialPos={initialPos}
-              />
-            </div>
+            <LoadingOverlay visible={isLoading} />
+            <BarChart
+              xLabel="Card Location"
+              yLabel="Probability Density"
+              //@ts-ignore
+              data={simResult}
+              initialPos={initialPos}
+            />
           </>
         )}
-      </Card>
+      </ContentCard>
       <AddModelDrawer
         opened={opened}
         close={close}
@@ -175,96 +155,4 @@ export const SimulationManager = () => {
       />
     </div>
   );
-
-  //   return (
-  //     <Grid style={{ margin: "2px" }}>
-  //       <Grid.Col span={12} md={5} style={{ minHeight: "calc(100vh - 60px)" }}>
-  //         <Card withBorder shadow="sm" style={{ height: "100%" }}>
-  //           Left
-  //         </Card>
-  //       </Grid.Col>
-  //       <Grid.Col span={12} md={7} style={{ minHeight: "calc(100vh - 60px)" }}>
-  //         <Card withBorder shadow="sm">
-  //           <div style={{ height: "100%" }}>
-  //             <BarChart xLabel="Prob" yLabel="Pos" data={[]} initialPos="1" />
-  //           </div>
-  //         </Card>
-  //       </Grid.Col>
-  //     </Grid>
-  //   );
 };
-// export const SimulationManager = () => {
-//   return (
-//     <Grid style={{ margin: "2px" }}>
-//       <Grid.Col span={12} md={5} style={{ minHeight: "calc(100vh - 60px)" }}>
-//         <Card
-//           withBorder
-//           shadow="sm"
-//           padding="xs"
-//           style={{
-//             height: "100%",
-//             display: "flex",
-//             flexDirection: "column",
-//             width: "100%",
-//           }}
-//         >
-//           <Card.Section inheritPadding py="xs" withBorder>
-//             <Group position="apart">
-//               <Button leftIcon={<IconSquarePlus size="1rem" />}>
-//                 Add Model
-//               </Button>
-//               <Button
-//                 disabled
-//                 color="pink"
-//                 leftIcon={<IconTrash size="1rem" />}
-//               >
-//                 Clear Models
-//               </Button>
-//             </Group>
-//           </Card.Section>
-//           <Card.Section style={{ flex: "1 1 auto" }}>Table</Card.Section>
-//           <Card.Section withBorder p="xs">
-//             <Group>
-//               <Button disabled>Simulate</Button>
-//             </Group>
-//           </Card.Section>
-//         </Card>
-//       </Grid.Col>
-//       <Grid.Col span={12} md={7} style={{ minHeight: "calc(100vh - 60px)" }}>
-//         <Card withBorder shadow="sm" padding="xs" style={{ height: "100%" }}>
-//           <Card.Section inheritPadding py="lg">
-//             <Tabs defaultValue={"prob"}>
-//               <Tabs.List>
-//                 <Tabs.Tab value="prob">Probability</Tabs.Tab>
-//                 <Tabs.Tab value="var">Variability</Tabs.Tab>
-//               </Tabs.List>
-
-//               <Tabs.Panel value="prob">
-//                 <Stack justify="space-between">
-//                   <Text fw={600}>Initial Location</Text>
-//                   <Slider
-//                     thumbChildren={<IconPlayCard size="1rem" />}
-//                     defaultValue={1}
-//                     min={1}
-//                     max={52}
-//                     step={1}
-//                     thumbSize={26}
-//                     styles={{ thumb: { borderWidth: rem(2), padding: rem(3) } }}
-//                     marks={createDeck(52).map((card) => {
-//                       return { value: card };
-//                     })}
-//                   />
-//                   <BarChart data={[]} initialPos="1" />
-//                 </Stack>
-//               </Tabs.Panel>
-
-//               <Tabs.Panel value="var">
-//                 <BarChart data={[]} initialPos="1" />
-//               </Tabs.Panel>
-//             </Tabs>
-//           </Card.Section>
-//         </Card>
-//       </Grid.Col>
-//     </Grid>
-//   );
-// };

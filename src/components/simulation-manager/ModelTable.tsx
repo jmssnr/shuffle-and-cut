@@ -38,7 +38,7 @@ export const ModelTable = ({ models, modelsHandlers }: ModelTableProps) => {
   };
 
   return (
-    <Table verticalSpacing="sm" miw={700}>
+    <Table verticalSpacing="sm" sx={{ minWidth: 500 }}>
       <thead>
         <tr>
           <th></th>
